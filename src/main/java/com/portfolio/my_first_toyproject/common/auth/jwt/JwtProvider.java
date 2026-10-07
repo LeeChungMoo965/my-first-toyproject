@@ -29,7 +29,7 @@ public class JwtProvider {
 
     // String 키를 JWT 전용 암호화 키로 변환
     public SecretKey getSecretKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(this.secretKey);
+        byte[] keyBytes = Decoders.BASE64.decode(this.secretKey); // 암호화 문자열 깨짐 방지와 정확한 데이터 관리를 위한 byte[]로 관리
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
