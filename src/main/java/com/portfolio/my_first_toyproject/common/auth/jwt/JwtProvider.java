@@ -37,7 +37,7 @@ public class JwtProvider {
     public TokenInfoDTO createToken(Authentication authentication) {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(",")); // 권한들을 ','로 하나의 문자열로 합침
+                .collect(Collectors.joining(",")); // 권한들을 ','로 하나의 문자열로 합침 JSON형태로 단순한 형태로 바꿔야 하기 때문에 콜렉션 형태에서 하나의 문자열 형태로 변환 작업
         Date now = new Date();
         Date accessTokenExpiresIn = new Date(now.getTime() + accessTokenValidTime); 
         Date refreshTokenExpiresIn = new Date(now.getTime() + refreshTokenValidTime);
