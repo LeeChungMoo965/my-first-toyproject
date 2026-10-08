@@ -1,20 +1,32 @@
 package com.portfolio.my_first_toyproject.common.auth.jwt;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication; 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.portfolio.my_first_toyproject.common.auth.jwt.dto.CustomUser;
 import com.portfolio.my_first_toyproject.common.auth.jwt.dto.TokenInfoDTO;
-
+@Slf4j
 @Component // 스프링이 이 클래스를 관리하도록 빈(Bean)으로 등록
 public class JwtProvider {
 
@@ -44,6 +56,7 @@ public class JwtProvider {
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
+                .claim("userId", ((CustomUser) authentication.getPrincipal()).getUserId()) // CustomUser에서 userId를 가져와 claim에 추가
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(getSecretKey(), SignatureAlgorithm.HS256)
                 .compact();
@@ -56,5 +69,46 @@ public class JwtProvider {
         // TokenInfoDTO를 통해 AccessToken과 RefreshToken을 클라이언트에게 전달
         // AccessToken은 클라이언트에서 인증 헤더에 담아 요청 시 사용, RefreshToken은 만료 시 재발급 요청에 사용
         
+    }
+    private Claims getClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSecretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+    private Authentication getAuthentication(String token) {
+        Claims claims = getClaims(token);
+        String auth = Optional.ofNullable(claims.get("auth", String.class))
+                .orElseThrow(() -> new IllegalArgumentException("권한 정보가 없는 토큰입니다."));
+        Collection<? extends GrantedAuthority> authorities = Arrays.stream(auth.split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+        Long userId = claims.get("userId", Long.class); // CustomUser에서 userId를 가져와 claim에서 추출
+        UserDetails principal = new CustomUser(userId, claims.getSubject(), "",authorities); // principal은 사용자 정보, authorityList는 권한 정보
+        return new UsernamePasswordAuthenticationToken(principal,"",authorities); // principal은 사용자 정보, authorityList는 권한 정보
+
+    }
+    public boolean validateToken(String token) {
+        try {
+            getClaims(token); // 토큰의 유효성을 검증하기 위해 Claims를 가져옴. 만약 토큰이 유효하지 않으면 예외가 발생
+            return true;
+        } catch (io.jsonwebtoken.security.SecurityException e) {
+                log.debug("[SecurityException]잘못된 JWT 서명입니다.");
+                throw new JwtException("[SecurityException] 잘못된 JWT 서명입니다.");
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            log.debug("[ExpiredJwtException] 토큰 만료");
+            throw new JwtException("[ExpiredJwtException] 토큰 만료");
+        } catch (io.jsonwebtoken.UnsupportedJwtException e) {
+            log.debug("[UnsupportedJwtException]지원되지 않는 JWT 토큰입니다.");
+            throw new JwtException("[UnsupportedJwtException] 지원되지 않는 JWT 토큰입니다.");
+        } catch (io.jsonwebtoken.MalformedJwtException e) {
+            log.debug("[MalformedJwtException] JWT 토큰이 잘못되었습니다.");
+            throw new JwtException("[MalformedJwtException] JWT 토큰이 잘못되었습니다.");
+        } catch (IllegalArgumentException e) {
+            log.debug("[IllegalArgumentException] JWT 토큰이 잘못되었습니다.");
+            throw new JwtException("[IllegalArgumentException] JWT 토큰이 잘못되었습니다.");
+        }
+            
     }
 }
