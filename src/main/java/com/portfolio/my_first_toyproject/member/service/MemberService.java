@@ -7,23 +7,27 @@ import com.portfolio.my_first_toyproject.member.domain.Member;
 import com.portfolio.my_first_toyproject.member.domain.Role;
 import com.portfolio.my_first_toyproject.member.dto.MemberCreateRequest;
 import com.portfolio.my_first_toyproject.member.repository.MemberRepository;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
 @Service
 @Transactional
 public class MemberService {
     private final MemberRepository memberRepository;
-
-    public MemberService(MemberRepository memberRepository){
+    private final PasswordEncoder passwordEncoder;
+    
+    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder){
         this.memberRepository = memberRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void addMember(MemberCreateRequest request){
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
         Member member = Member.builder()
                 .email(request.getEmail())
-                .password(request.getPassword()) // 나중엔 여기에 암호화 로직이 들어갑니다
+                .password(encodedPassword)
                 .name(request.getName())
                 .role(Role.BOSS) // 사장님 가입이니까 기본 권한 셋팅
                 .build();
         memberRepository.save(member);
     }
 }
+    
