@@ -77,7 +77,7 @@ public class JwtProvider {
                 .parseClaimsJws(token)
                 .getBody();
     }
-    private Authentication getAuthentication(String token) {
+    public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
         String auth = Optional.ofNullable(claims.get("auth", String.class))
                 .orElseThrow(() -> new IllegalArgumentException("권한 정보가 없는 토큰입니다."));
