@@ -34,10 +34,17 @@ public class AuthService {
         }
 
         // 2. JWT 토큰 생성
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
+        com.portfolio.my_first_toyproject.common.auth.jwt.dto.CustomUser customUser =
+        new com.portfolio.my_first_toyproject.common.auth.jwt.dto.CustomUser(
+                member.getId(),
                 member.getEmail(),
-                null,
+                member.getPassword(),
                 Collections.singletonList(new SimpleGrantedAuthority(member.getRole().name()))
+        );
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                customUser, // 여기에 CustomUser 객체가 통째로 들어갑니다!
+                null,
+                customUser.getAuthorities()
         );
         TokenInfoDTO tokenInfo = jwtProvider.createToken(authentication);
 
