@@ -25,7 +25,9 @@ public class MemberService {
                 .email(request.getEmail())
                 .password(encodedPassword)
                 .name(request.getName())
-                .role(Role.BOSS) // 사장님 가입이니까 기본 권한 셋팅
+                .role(Role.USER) // 사장님 가입이니까 기본 권한 셋팅
+                .age(request.getAge())
+                .gender(request.getGender())
                 .build();
         memberRepository.save(member);
     }

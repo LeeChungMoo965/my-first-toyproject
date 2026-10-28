@@ -1,10 +1,14 @@
 package com.portfolio.my_first_toyproject.member.dto;
 
+import com.portfolio.my_first_toyproject.member.domain.Gender;
+
 public class MemberCreateRequest {
     
     private String email;
     private String password;
     private String name;
+    private int age;
+    private Gender gender;
 
     // 기본 생성자 (스프링부트가 JSON을 객체로 변환할 때 꼭 필요합니다!)
     public MemberCreateRequest() {
@@ -23,6 +27,14 @@ public class MemberCreateRequest {
         return name;
     }
 
+    public int getAge() {
+        return age;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
     // 데이터 저장용 Setter
     public void setEmail(String email) {
         this.email = email;
@@ -34,5 +46,13 @@ public class MemberCreateRequest {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
     }
 }
