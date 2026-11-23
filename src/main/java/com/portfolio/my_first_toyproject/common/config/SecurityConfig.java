@@ -32,8 +32,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/members/signup", "/api/auth/login", "/error").permitAll()
+                        .requestMatchers("/api/members/signup", "/api/auth/login", "/error","/h2-console/**","/*.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 // 3. 임포트가 잘 되었으니 이제 빨간 줄 없이 정상 인식될 겁니다.

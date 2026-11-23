@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>여행 코스 리스트</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f4f4f9; }
+        .course-card { 
+            background: white; border-radius: 8px; padding: 15px; 
+            margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+        input, button { padding: 10px; margin-top: 5px; }
+        button { cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>✈️ 나의 여행 코스 리스트</h1>
+
+    <!-- 보안 토큰 입력창 -->
+    <div style="margin-bottom: 20px; padding: 15px; background: #fff; border-radius: 8px;">
+        <label><b>🔑 발급받은 토큰(Bearer 제외)을 여기에 붙여넣으세요:</b></label><br>
+        <input type="text" id="jwt-token" style="width: 80%;" placeholder="eyJh..."><br>
+        <button onclick="fetchCourses()">데이터 불러오기</button>
+    </div>
+
+    <!-- 백엔드 데이터가 들어갈 빈 공간 -->
+    <div id="course-list"></div>
+
+    <script>
+        function fetchCourses() {
+            const token = document.getElementById('jwt-token').value;
+            if(!token) {
+                alert("토큰을 먼저 입력해주세요!");
+                return;
+            }
+
+            // fetch를 이용해 GET /api/courses 요청 보내기
+            fetch('/api/courses', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token, // 토큰 헤더 추가
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if(!response.ok) throw new Error("API 에러! 상태 코드: " + response.status);
+                return response.json(); // JSON 텍스트를 JS 객체로 변환
+            })
+            .then(data => {
+                const listDiv = document.getElementById('course-list');
+                listDiv.innerHTML = ''; // 기존 내용 초기화
+
+                // 데이터를 돌면서 HTML 카드 태그로 만들기
+                data.forEach(course => {
+                    listDiv.innerHTML += `
+                        <div class="course-card">
+                            <h2>${course.title} <span style="font-size: 14px; color: gray;">(ID: ${course.id})</span></h2>
+                            <p><b>요약:</b> ${course.summary}</p>
+                            <p><b>카테고리:</b> ${course.placeCategory}</p>
+                            <p><b>공개 여부:</b> ${course.publicContent}</p>
+                            <p><b>총 비용:</b> <span style="color: blue;">${course.totalPrice}원</span></p>
+                        </div>
+                    `;
+                });
+            })
+            .catch(error => {
+                alert("데이터 로드 실패: " + error.message);
+            });
+        }
+    </script>
+</body>
+</html>
