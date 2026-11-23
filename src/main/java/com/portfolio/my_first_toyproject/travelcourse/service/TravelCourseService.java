@@ -106,12 +106,10 @@ public class TravelCourseService {
     }
     @Transactional
     public CourseResultResponse deleteTravelCourse(Long id) {
-        try{
+            travelCourseRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행 코스입니다 id: " + id));
             travelCourseRepository.deleteById(id);
-       
             return CourseResultResponse.success("삭제 성공", id);
-        } catch (Exception e) {
-            return CourseResultResponse.fail("삭제 실패", id);
-        }
+        
     }
 }
