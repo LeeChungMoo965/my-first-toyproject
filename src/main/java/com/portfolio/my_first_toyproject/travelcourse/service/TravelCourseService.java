@@ -112,4 +112,12 @@ public class TravelCourseService {
             return CourseResultResponse.success("삭제 성공", id);
         
     }
+    @Transactional
+    public CourseResultResponse updateTravelCourse(Long id, TravelCourseCreateRequest request) {
+        TravelCourse travelCourse = travelCourseRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행 코스입니다 id: " + id));
+        travelCourse.updateFromRequest(request);
+        travelCourseRepository.save(travelCourse);
+        return CourseResultResponse.success("수정 성공", id);
+    }
 }

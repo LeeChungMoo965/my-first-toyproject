@@ -15,4 +15,5 @@ public interface TravelCourseRepository extends JpaRepository<TravelCourse, Long
     List<TravelCourse> findByTitleAndPlaceCategory(String title, PlaceCategory category);
     Optional<TravelCourse> findById(Long id);
     void deleteById(Long id);
+    TravelCourse save(TravelCourse travelCourse);
 }

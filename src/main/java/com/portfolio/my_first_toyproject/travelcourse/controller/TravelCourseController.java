@@ -56,3 +56,10 @@ public class TravelCourseController {
             travelCourseService.deleteTravelCourse(id);
             return ResponseEntity.noContent().build();
         }
+        @PutMapping("/{id}")
+        public ResponseEntity<CourseResultResponse> updateCourse(@PathVariable Long id, @RequestBody TravelCourseCreateRequest request){
+            
+            CourseResultResponse response = travelCourseService.updateTravelCourse(id, request);
+            return ResponseEntity.ok(response);
+        }
+}
